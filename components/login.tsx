@@ -9,27 +9,32 @@ const LoginPage = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const {addUser} = useUser()
+    const [voteMessage, setVoteMessage] = useState('')
 
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        //e.preventDefault();
+        e.preventDefault();
+    
         try {
             const response = await axios.post(
                 "http://localhost:3000/api/login", {
                 email,
                 password,
-            }
-            )
-            // Check if response contains user data
-            if (response && response.data) {
-                // Pass user data to addUser function
+            });
+    
+            // Check if the request was successful (status code 2xx)
+            if (response.status >= 200 && response.status < 300) {
+                console.log("successful response", response.data);
+                // Add the response data to global state
                 addUser(response.data);
-                // Redirect after successful login
+                // Redirect or perform any other action after successful login
                 window.location.href = '/';
             }
         } catch (error) {
-            console.log("an error occurred: ", error);
+            console.log("An error occurred: ", error);
+            setVoteMessage('email or password is invalid');
         }
     }
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -42,11 +47,11 @@ const LoginPage = () => {
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email-address" className="sr-only">Email address</label>
-                            <input id="email-address" name="email" type="email" autoComplete="email" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address" />
+                            <input onChange={(e)=> setEmail(e.target.value)} id="email-address" name="email" type="email" autoComplete="email" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address" />
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">Password</label>
-                            <input id="password" name="password" type="password" autoComplete="current-password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password" />
+                            <input onChange={(e)=> setPassword(e.target.value)} id="password" name="password" type="password" autoComplete="current-password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password" />
                         </div>
                     </div>
 
@@ -66,14 +71,11 @@ const LoginPage = () => {
                     </div>
 
                     <div>
+                        {/* Display vote message */}
+                        <div className="flex justify-center mt-4">
+                        {voteMessage && <p className={voteMessage.includes('successfully') ? 'text-green-500' : 'text-red-500'}>{voteMessage}</p>}
+                        </div>
                         <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                                {/* Heroicon name: lock-closed */}
-                                <svg className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fillRule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                                    <path fillRule="evenodd" d="M4 7a4 4 0 118 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2V7zm10-3a1 1 0 011 1v5a1 1 0 01-1 1h-1V7a2 2 0 00-2-2H7a2 2 0 00-2 2v4H4a1 1 0 110-2h1V5a1 1 0 011-1h4V3a1 1 0 012 0v1h1zM6 7h2v5H6V7zm6 0h2v5h-2V7z" clipRule="evenodd" />
-                                </svg>
-                            </span>
                             Sign in
                         </button>
                         <div className="text-center p-5">

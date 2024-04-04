@@ -1,13 +1,13 @@
 // import { NextApiRequest, NextApiResponse } from 'next';
 import prismadb from "@/lib/prisma/prismadb";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
-        const { email, password } = body;
+        const data = await request.json();
+        const { email, password } = data;
 
-
-        const existingVoter = await prismadb.voter.findFirst({
+        const existingVoter = await prismadb.voter.findUnique({
             where: {
                 email,
                 password,
@@ -15,27 +15,15 @@ export async function POST(request: Request) {
         });
 
         if (existingVoter) {
-            // Return the user data if found
-            return new Response(JSON.stringify(existingVoter), {
-                headers: { "Content-Type": "application/json" },
-                status: 200,
-            });
+            // Return the entire user object if found
+            return NextResponse.json(existingVoter, { status: 200 });
         } else {
             // If user is not found, return an error response
-            return new Response(
-                JSON.stringify({ message: "Invalid email or password" }),
-                {
-                    headers: { "Content-Type": "application/json" },
-                    status: 401, // Unauthorized
-                }
-            );
+            return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
         }
     } catch (error) {
         console.log("An error occurred: ", error);
         // Return an internal server error response
-        return new Response(
-            JSON.stringify({ message: "Internal server error" }),
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
 }

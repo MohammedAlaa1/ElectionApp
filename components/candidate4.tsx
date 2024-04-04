@@ -1,6 +1,36 @@
-import Image from 'next/image'
+'use client'
+import { useState } from 'react';
+import candidates from '../data/candidates';
+import Image from 'next/image';
+import useUser from '../lib/useUser';
+import axios from 'axios';
 
 const Candidate4ProfilePage = () => {
+    const [voteMessage, setVoteMessage] = useState('');
+    const candidate = candidates[3]; 
+    const { userInfo } = useUser();
+
+    const handleVote = async () => {
+        try {
+            const response = await axios.post('http://localhost:3000/api/vote', { 
+                email: userInfo.email,
+                id: 4,
+            });
+            console.log({ email: userInfo.email });
+
+            if (response.status === 200) {
+                // Update the vote message
+                setVoteMessage('Your vote was recorded successfully.');
+                console.log('Vote recorded successfully.');
+            }
+            
+        } catch (error) {
+            console.log('Failed to record vote.');
+            console.error('Failed to record vote:', error);
+            setVoteMessage('You can not vote twice.');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-900">
             {/* Header */}
@@ -15,25 +45,30 @@ const Candidate4ProfilePage = () => {
 
             {/* Candidate Profile */}
             <div className="max-w-4xl mx-auto px-4 py-12">
-                <div className="bg-red-100   rounded-lg shadow-lg p-6">
+                <div className="bg-blue-100 rounded-lg shadow-lg p-6">
                     <div className="flex items-center justify-center mb-6">
-                        <Image src="/candidate5.png" width={200} height={5} alt="Candidate 5"/>
+                        {/* Display candidate image */}
+                        <Image src={candidate.image} width={200} height={200} alt={candidate.name} />
                     </div>
-                    <h2 className="text-2xl font-bold mb-2 text-gray-800">Benjamin Patel</h2>
-                    <p className="text-lg text-gray-600 mb-2">Building Bridges, Bridging Divides: Together Towards Equality</p>
-                    <p className="text-lg text-gray-600 mb-4">Age: 45</p>
-                    <p className="text-lg text-gray-600 mb-4">City: Houston</p>
-                    <p className="text-lg text-gray-600 mb-4">Occupation: scientist.</p>
-                    <p className="text-lg text-gray-600 mb-6">Education: JD, Houston science School</p>
-                    <p className="text-gray-700">    
-                    Benjamin Patel is deeply committed to advancing social justice and equality for all. With a forward-thinking approach, he envisions a community where every person has equal opportunities and essential resources at their disposal. Leveraging his extensive experience as a seasoned lawyer specializing in civil rights cases, Alexander is determined to address systemic injustices and promote inclusivity across all levels of governance. His holistic platform includes the enactment of policies aimed at empowering marginalized communities, improving access to vital services such as healthcare and education, and fostering sustainable economic growth.</p>
+                    <h2 className="text-2xl font-bold mb-2 text-gray-800">{candidate.name}</h2>
+                    <p className="text-lg text-gray-600 mb-2">{candidate.tagline}</p>
+                    {/* Display candidate information */}
+                    <p className="text-lg text-gray-600 mb-4">Age: {candidate.age}</p>
+                    <p className="text-lg text-gray-600 mb-4">City: {candidate.city}</p>
+                    <p className="text-lg text-gray-600 mb-4">Occupation: {candidate.occupation}</p>
+                    <p className="text-lg text-gray-600 mb-4">Education: {candidate.education}</p>
+                    <p className="text-gray-700">{candidate.description}</p>
                 </div>
-                 {/* Vote for Me Button */}
-                    <div className="flex justify-center">
-                        <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">
-                            Vote for Me
-                        </button>
-                    </div>
+                {/* Display vote message */}
+                <div className="flex justify-center mt-4">
+                {voteMessage && <p className={voteMessage.includes('successfully') ? 'text-green-500' : 'text-red-500'}>{voteMessage}</p>}
+                </div>
+                {/* Vote for Me Button */}
+                <div className="flex justify-center">
+                    <button onClick={handleVote} className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">
+                        Vote for Me
+                    </button>
+                </div>
             </div>
         </div>
     );

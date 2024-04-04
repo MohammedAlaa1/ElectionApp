@@ -1,6 +1,36 @@
-import Image from 'next/image'
+'use client'
+import { useState } from 'react';
+import candidates from '../data/candidates';
+import Image from 'next/image';
+import useUser from '../lib/useUser';
+import axios from 'axios';
 
 const Candidate2ProfilePage = () => {
+    const [voteMessage, setVoteMessage] = useState('');
+    const candidate = candidates[1]; 
+    const { userInfo } = useUser();
+
+    const handleVote = async () => {
+        try {
+            const response = await axios.post('http://localhost:3000/api/vote', { 
+                email: userInfo.email,
+                id: 2,
+            });
+            console.log({ email: userInfo.email });
+
+            if (response.status === 200) {
+                // Update the vote message
+                setVoteMessage('Your vote was recorded successfully.');
+                console.log('Vote recorded successfully.');
+            }
+            
+        } catch (error) {
+            console.log('Failed to record vote.');
+            console.error('Failed to record vote:', error);
+            setVoteMessage('You can not vote twice.');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-900">
             {/* Header */}
@@ -15,26 +45,30 @@ const Candidate2ProfilePage = () => {
 
             {/* Candidate Profile */}
             <div className="max-w-4xl mx-auto px-4 py-12">
-                <div className="bg-green-100 rounded-lg shadow-lg p-6">
+                <div className="bg-blue-100 rounded-lg shadow-lg p-6">
                     <div className="flex items-center justify-center mb-6">
-                        <Image src="/candidate2.png" width={200} height={5} alt="Candidate 2"/>
+                        {/* Display candidate image */}
+                        <Image src={candidate.image} width={200} height={200} alt={candidate.name} />
                     </div>
-                    <h2 className="text-2xl font-bold mb-2 text-gray-800">Gabriel Smith</h2>
-                    <p className="text-lg text-gray-600 mb-2">Uniting Voices, Shaping Tomorrow</p>
-                    <p className="text-lg text-gray-600 mb-4">Age: 42</p>
-                    <p className="text-lg text-gray-600 mb-4">City: Los Angeles</p>
-                    <p className="text-lg text-gray-600 mb-4">Occupation: Lawyer</p>
-                    <p className="text-lg text-gray-600 mb-6">Education: JD, Harvard Law School</p>
-                    <p className="text-gray-700">
-                        Gabriel Smith is a dedicated champion for social justice and equality. With a vision to foster a community where every individual has equitable access to resources and opportunities, John brings his extensive legal expertise in civil rights cases to the forefront of his campaign. His mission is clear: to dismantle systemic inequalities and promote inclusivity across all facets of governance. Through targeted policies aimed at supporting marginalized communities, enhancing healthcare and education accessibility, and driving sustainable economic growth, John aims to create a more just and equitable society for all.
-                    </p>
+                    <h2 className="text-2xl font-bold mb-2 text-gray-800">{candidate.name}</h2>
+                    <p className="text-lg text-gray-600 mb-2">{candidate.tagline}</p>
+                    {/* Display candidate information */}
+                    <p className="text-lg text-gray-600 mb-4">Age: {candidate.age}</p>
+                    <p className="text-lg text-gray-600 mb-4">City: {candidate.city}</p>
+                    <p className="text-lg text-gray-600 mb-4">Occupation: {candidate.occupation}</p>
+                    <p className="text-lg text-gray-600 mb-4">Education: {candidate.education}</p>
+                    <p className="text-gray-700">{candidate.description}</p>
                 </div>
-                 {/* Vote for Me Button */}
-                    <div className="flex justify-center">
-                        <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">
-                            Vote for Me
-                        </button>
-                    </div>
+                {/* Display vote message */}
+                <div className="flex justify-center mt-4">
+                {voteMessage && <p className={voteMessage.includes('successfully') ? 'text-green-500' : 'text-red-500'}>{voteMessage}</p>}
+                </div>
+                {/* Vote for Me Button */}
+                <div className="flex justify-center">
+                    <button onClick={handleVote} className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">
+                        Vote for Me
+                    </button>
+                </div>
             </div>
         </div>
     );

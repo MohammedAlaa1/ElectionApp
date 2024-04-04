@@ -27,3 +27,11 @@ model Voter {
   city        String
   voted       Boolean?
 }
+
+model Candidate {
+  id        Int    @id @default(autoincrement())
+  name      String
+  imagePath String @unique
+  age       Int
+  votes     Int
+}

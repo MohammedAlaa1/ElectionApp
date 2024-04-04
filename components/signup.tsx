@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import axios from 'axios';
 import { FormEvent, useState } from 'react';
+import useUser from "../lib/useUser"
+
 
 const SignupPage = () => {
 
@@ -16,6 +18,8 @@ const SignupPage = () => {
   const [city, setCity] = useState("")
   const [usernameError,setUsernameError] = useState("")
   const [emailError, setEmailError] = useState("");
+  const {addUser} = useUser()
+
 
 
       // Email validation function
@@ -25,54 +29,51 @@ const SignupPage = () => {
         return regex.test(email);
       };
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    //e.preventDefault()
-
-    //username validation
-    if (username.length < 2) {
-      setUsernameError("Username must be at least two characters long");
-      e.preventDefault()
-      return;
-    } else {
-      setUsernameError("");
-    }
-    //email validation
-    if (!validateEmail(email)) {
-      setEmailError("Invalid email address");
-      e.preventDefault()
-      return;
-    } else {
-      setEmailError("");
-    }
-
-
-    try{
-      await axios.post(
-        "http://localhost:3000/api/signup",{
-          username,
-          email,
-          password,
-          full_name,
-          DOB,
-          national_id,
-          gender,
-          city,
+      const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+    
+        // username validation
+        if (username.length < 2) {
+            setUsernameError("Username must be at least two characters long");
+            return;
+        } else {
+            setUsernameError("");
         }
-      )
-      setUsername("")
-      setEmail("")
-      setPassword("")
-      setFullname("")
-      setDob("")
-      setNationalId("")
-      setGender("")
-      setCity("")
-      console.log("user were inserted successsfully ")
-      window.location.href = '/';
-    }catch(error){
-      console.log("an error accured: ", error);
+    
+        // email validation
+        if (!validateEmail(email)) {
+            setEmailError("Invalid email address");
+            return;
+        } else {
+            setEmailError("");
+        }
+    
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/api/signup", {
+                    username,
+                    email,
+                    password,
+                    full_name,
+                    DOB,
+                    national_id,
+                    gender,
+                    city,
+                }
+            );
+    
+            console.log("Response:", response.data); // Log response data
+    
+            if (response.status >= 200 && response.status < 300) {
+                console.log("successful response");
+                addUser(response.data);
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.log("an error occurred: ", error);
+        }
     }
-  }
+    
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
